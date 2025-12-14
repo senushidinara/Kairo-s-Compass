@@ -1,0 +1,143 @@
+{
+  "name": "Kairo's Compass - Route Calculation E2E",
+  "type": "api",
+  "subtype": "http",
+  "config": {
+    "request": {
+      "method": "POST",
+      "url": "https://api.kairos-compass.com/api/v1/routes/calculate",
+      "timeout": 60,
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {{SYNTHETICS_API_TOKEN}}",
+        "User-Agent": "Datadog Synthetics E2E"
+      },
+      "body": {
+        "origin": {
+          "port": "SGSIN",
+          "name": "Singapore",
+          "coordinates": {
+            "lat": 1.2644,
+            "lon": 103.8227
+          }
+        },
+        "destination": {
+          "port": "NLRTM",
+          "name": "Rotterdam",
+          "coordinates": {
+            "lat": 51.9225,
+            "lon": 4.4792
+          }
+        },
+        "vessel": {
+          "type": "container_ship",
+          "draft": 14.5,
+          "speed": 18,
+          "fuel_consumption": 45
+        },
+        "departure_time": "{{CURRENT_TIMESTAMP}}",
+        "optimization_preferences": {
+          "fuel_efficiency": 0.8,
+          "time_efficiency": 0.2,
+          "weather_avoidance": true
+        }
+      }
+    },
+    "assertions": [
+      {
+        "type": "statusCode",
+        "operator": "is",
+        "target": 200
+      },
+      {
+        "type": "responseTime",
+        "operator": "lessThan",
+        "target": 5000,
+        "comment": "Route calculation should complete within 5 seconds"
+      },
+      {
+        "type": "body",
+        "operator": "contains",
+        "target": "optimized_route"
+      },
+      {
+        "type": "body",
+        "operator": "contains",
+        "target": "fuel_savings"
+      },
+      {
+        "type": "jsonpath",
+        "operator": "isNot",
+        "property": "$.optimized_route",
+        "target": null
+      },
+      {
+        "type": "jsonpath",
+        "operator": "greaterThan",
+        "property": "$.fuel_savings.percentage",
+        "target": 0,
+        "comment": "Should show positive fuel savings"
+      },
+      {
+        "type": "jsonpath",
+        "operator": "greaterThan",
+        "property": "$.optimized_route.waypoints.length",
+        "target": 2,
+        "comment": "Route should have multiple waypoints"
+      },
+      {
+        "type": "jsonpath",
+        "operator": "lessThan",
+        "property": "$.eta.hours",
+        "target": 720,
+        "comment": "ETA should be reasonable (< 30 days)"
+      }
+    ],
+    "extractedValues": [
+      {
+        "name": "ROUTE_ID",
+        "type": "jsonpath",
+        "field": "$.route_id"
+      },
+      {
+        "name": "FUEL_SAVINGS",
+        "type": "jsonpath",
+        "field": "$.fuel_savings.percentage"
+      },
+      {
+        "name": "CALCULATION_TIME",
+        "type": "header",
+        "field": "X-Calculation-Time-Ms"
+      }
+    ]
+  },
+  "locations": [
+    "aws:us-east-1",
+    "aws:eu-west-1",
+    "aws:ap-southeast-1",
+    "aws:ap-northeast-1"
+  ],
+  "options": {
+    "tick_every": 300,
+    "min_failure_duration": 300,
+    "min_location_failed": 2,
+    "follow_redirects": true,
+    "retry": {
+      "count": 1,
+      "interval": 300
+    },
+    "monitor_options": {
+      "renotify_interval": 60
+    }
+  },
+  "message": "## Route Calculation E2E Test Failed\n\nThe end-to-end route calculation test has failed.\n\n**Test Details:**\n- Route: Singapore to Rotterdam\n- Status: {{check.status}}\n- Response time: {{check.responseTime}}ms\n- Failed locations: {{check.failedLocations}}\n- Error: {{check.error}}\n\n**Performance Benchmarks:**\n- Fuel savings: {{FUEL_SAVINGS}}%\n- Calculation time: {{CALCULATION_TIME}}ms\n\n**Potential Issues:**\n1. Route optimization algorithm failure\n2. Database query timeout\n3. External weather API unavailable\n4. AIS data pipeline issues\n5. ML model prediction errors\n\n**Impact:**\n- Core functionality impaired\n- Customer-facing feature unavailable\n- Revenue impact\n\n**Action Items:**\n1. Check application logs for route ID\n2. Review APM traces\n3. Verify database performance\n4. Check external API dependencies\n5. Validate AIS data freshness\n\n{{#is_alert}}\n@slack-nav-engineering-critical\n@pagerduty\n{{/is_alert}}\n\n{{#is_warning}}\n@slack-nav-engineering\n{{/is_warning}}",
+  "tags": [
+    "service:kairo-api",
+    "team:nav-engineering",
+    "category:e2e-test",
+    "env:production",
+    "feature:route-calculation",
+    "slo:functionality"
+  ],
+  "status": "live"
+}

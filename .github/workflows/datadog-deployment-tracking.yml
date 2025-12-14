@@ -1,0 +1,167 @@
+name: Datadog Deployment Tracking
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+      - develop
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+      version:
+        description: 'Version tag'
+        required: true
+        default: 'latest'
+
+jobs:
+  track-deployment:
+    name: Track Deployment in Datadog
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Get commit info
+      id: commit
+      run: |
+        echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
+        echo "author=$(git log -1 --pretty=%an)" >> $GITHUB_OUTPUT
+        
+    - name: Determine environment
+      id: env
+      run: |
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+        elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+          echo "environment=production" >> $GITHUB_OUTPUT
+        elif [[ "${{ github.ref }}" == "refs/heads/staging" ]]; then
+          echo "environment=staging" >> $GITHUB_OUTPUT
+        else
+          echo "environment=development" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Determine version
+      id: version
+      run: |
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+        elif [[ "${{ github.event_name }}" == "release" ]]; then
+          echo "version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+        else
+          echo "version=${{ steps.commit.outputs.sha }}" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Send deployment event to Datadog
+      run: |
+        curl -X POST "https://api.datadoghq.com/api/v1/events" \
+        -H "Content-Type: application/json" \
+        -H "DD-API-KEY: ${{ secrets.DD_API_KEY }}" \
+        -d @- << EOF
+        {
+          "title": "Kairo's Compass Deployment to ${{ steps.env.outputs.environment }}",
+          "text": "Deployment of version ${{ steps.version.outputs.version }} to ${{ steps.env.outputs.environment }}\n\nCommit: ${{ steps.commit.outputs.sha }}\nAuthor: ${{ steps.commit.outputs.author }}\nMessage: ${{ steps.commit.outputs.message }}",
+          "priority": "normal",
+          "tags": [
+            "service:kairo-compass",
+            "env:${{ steps.env.outputs.environment }}",
+            "version:${{ steps.version.outputs.version }}",
+            "deployment:true",
+            "git_commit:${{ steps.commit.outputs.sha }}",
+            "git_repository:${{ github.repository }}"
+          ],
+          "alert_type": "info",
+          "source_type_name": "github"
+        }
+        EOF
+        
+    - name: Create deployment marker
+      run: |
+        curl -X POST "https://api.datadoghq.com/api/v1/series" \
+        -H "Content-Type: application/json" \
+        -H "DD-API-KEY: ${{ secrets.DD_API_KEY }}" \
+        -d @- << EOF
+        {
+          "series": [
+            {
+              "metric": "kairo.deployment.marker",
+              "points": [[$(date +%s), 1]],
+              "type": "count",
+              "tags": [
+                "service:kairo-compass",
+                "env:${{ steps.env.outputs.environment }}",
+                "version:${{ steps.version.outputs.version }}",
+                "git_commit:${{ steps.commit.outputs.sha }}"
+              ]
+            }
+          ]
+        }
+        EOF
+        
+    - name: Send deployment metrics
+      run: |
+        curl -X POST "https://api.datadoghq.com/api/v1/series" \
+        -H "Content-Type: application/json" \
+        -H "DD-API-KEY: ${{ secrets.DD_API_KEY }}" \
+        -d @- << EOF
+        {
+          "series": [
+            {
+              "metric": "kairo.deployment.count",
+              "points": [[$(date +%s), 1]],
+              "type": "count",
+              "tags": [
+                "service:kairo-compass",
+                "env:${{ steps.env.outputs.environment }}",
+                "version:${{ steps.version.outputs.version }}"
+              ]
+            }
+          ]
+        }
+        EOF
+    
+    - name: Update deployment status
+      if: always()
+      run: |
+        STATUS="${{ job.status }}"
+        curl -X POST "https://api.datadoghq.com/api/v1/events" \
+        -H "Content-Type: application/json" \
+        -H "DD-API-KEY: ${{ secrets.DD_API_KEY }}" \
+        -d @- << EOF
+        {
+          "title": "Deployment $STATUS: Kairo's Compass ${{ steps.env.outputs.environment }}",
+          "text": "Deployment to ${{ steps.env.outputs.environment }} completed with status: $STATUS\n\nVersion: ${{ steps.version.outputs.version }}\nCommit: ${{ steps.commit.outputs.sha }}",
+          "priority": "normal",
+          "tags": [
+            "service:kairo-compass",
+            "env:${{ steps.env.outputs.environment }}",
+            "version:${{ steps.version.outputs.version }}",
+            "deployment:true",
+            "deployment_status:$STATUS"
+          ],
+          "alert_type": "$( [ '$STATUS' == 'success' ] && echo 'success' || echo 'error' )",
+          "source_type_name": "github"
+        }
+        EOF
+        
+    - name: Output deployment info
+      run: |
+        echo "✅ Deployment tracking complete"
+        echo "Environment: ${{ steps.env.outputs.environment }}"
+        echo "Version: ${{ steps.version.outputs.version }}"
+        echo "Commit: ${{ steps.commit.outputs.sha }}"
+        echo ""
+        echo "View deployment in Datadog:"
+        echo "https://app.datadoghq.com/event/stream?query=deployment%3Atrue%20service%3Akairo-compass"

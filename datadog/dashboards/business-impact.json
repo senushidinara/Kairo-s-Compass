@@ -1,0 +1,359 @@
+{
+  "title": "Kairo's Compass - Business Impact",
+  "description": "Key business metrics including fuel savings, CO₂ reduction, voyage optimization, and cost savings",
+  "widgets": [
+    {
+      "id": 1,
+      "definition": {
+        "type": "query_value",
+        "title": "Total Fuel Saved (MTD)",
+        "requests": [
+          {
+            "q": "sum:kairo.fuel_savings.total{*}.rollup(sum)",
+            "aggregator": "sum"
+          }
+        ],
+        "precision": 2,
+        "custom_unit": "metric tons",
+        "text_align": "center",
+        "custom_links": []
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 2,
+      "definition": {
+        "type": "query_value",
+        "title": "CO₂ Reduction (MTD)",
+        "requests": [
+          {
+            "q": "sum:kairo.co2_reduction.total{*}.rollup(sum)",
+            "aggregator": "sum"
+          }
+        ],
+        "precision": 2,
+        "custom_unit": "metric tons"
+      },
+      "layout": {
+        "x": 3,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 3,
+      "definition": {
+        "type": "query_value",
+        "title": "Cost Savings (MTD)",
+        "requests": [
+          {
+            "q": "sum:kairo.cost_savings.total{*}.rollup(sum)",
+            "aggregator": "sum"
+          }
+        ],
+        "precision": 0,
+        "custom_unit": "USD"
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 4,
+      "definition": {
+        "type": "query_value",
+        "title": "Voyages Optimized (MTD)",
+        "requests": [
+          {
+            "q": "sum:kairo.voyages.optimized{*}.rollup(sum)",
+            "aggregator": "sum"
+          }
+        ],
+        "precision": 0,
+        "custom_unit": "voyages"
+      },
+      "layout": {
+        "x": 9,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 5,
+      "definition": {
+        "type": "timeseries",
+        "title": "Cumulative Fuel Savings Trend",
+        "requests": [
+          {
+            "q": "cumsum(sum:kairo.fuel_savings.total{*})",
+            "display_type": "area",
+            "style": {
+              "palette": "green"
+            }
+          }
+        ],
+        "yaxis": {
+          "include_zero": true,
+          "label": "metric tons"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 2,
+        "width": 6,
+        "height": 3
+      }
+    },
+    {
+      "id": 6,
+      "definition": {
+        "type": "timeseries",
+        "title": "Cumulative CO₂ Reduction Trend",
+        "requests": [
+          {
+            "q": "cumsum(sum:kairo.co2_reduction.total{*})",
+            "display_type": "area",
+            "style": {
+              "palette": "cool"
+            }
+          }
+        ],
+        "yaxis": {
+          "include_zero": true,
+          "label": "metric tons CO₂"
+        }
+      },
+      "layout": {
+        "x": 6,
+        "y": 2,
+        "width": 6,
+        "height": 3
+      }
+    },
+    {
+      "id": 7,
+      "definition": {
+        "type": "timeseries",
+        "title": "Fuel Savings Percentage by Voyage",
+        "requests": [
+          {
+            "q": "avg:kairo.fuel_savings.percentage{*} by {voyage_id}",
+            "display_type": "line"
+          }
+        ],
+        "markers": [
+          {
+            "value": "y = 20",
+            "display_type": "ok dashed",
+            "label": "Target: 20%"
+          }
+        ],
+        "yaxis": {
+          "include_zero": true,
+          "label": "%"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 5,
+        "width": 6,
+        "height": 2
+      }
+    },
+    {
+      "id": 8,
+      "definition": {
+        "type": "timeseries",
+        "title": "Voyage Optimization Success Rate",
+        "requests": [
+          {
+            "q": "avg:kairo.route.optimization_success_rate{*}*100",
+            "display_type": "line"
+          }
+        ],
+        "markers": [
+          {
+            "value": "y = 95",
+            "display_type": "ok dashed",
+            "label": "SLO: 95%"
+          }
+        ],
+        "yaxis": {
+          "include_zero": true,
+          "max": "100",
+          "label": "%"
+        }
+      },
+      "layout": {
+        "x": 6,
+        "y": 5,
+        "width": 6,
+        "height": 2
+      }
+    },
+    {
+      "id": 9,
+      "definition": {
+        "type": "sunburst",
+        "title": "Fuel Savings by Route Type",
+        "requests": [
+          {
+            "q": "sum:kairo.fuel_savings.total{*} by {route_type,vessel_type}"
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 7,
+        "width": 4,
+        "height": 3
+      }
+    },
+    {
+      "id": 10,
+      "definition": {
+        "type": "treemap",
+        "title": "Cost Savings by Customer",
+        "requests": [
+          {
+            "q": "sum:kairo.cost_savings.total{*} by {customer_id}"
+          }
+        ]
+      },
+      "layout": {
+        "x": 4,
+        "y": 7,
+        "width": 4,
+        "height": 3
+      }
+    },
+    {
+      "id": 11,
+      "definition": {
+        "type": "toplist",
+        "title": "Top Performing Routes",
+        "requests": [
+          {
+            "q": "top(avg:kairo.fuel_savings.percentage{*} by {route_id}, 10, 'mean', 'desc')"
+          }
+        ]
+      },
+      "layout": {
+        "x": 8,
+        "y": 7,
+        "width": 4,
+        "height": 3
+      }
+    },
+    {
+      "id": 12,
+      "definition": {
+        "type": "timeseries",
+        "title": "Model Prediction Accuracy",
+        "requests": [
+          {
+            "q": "avg:kairo.current.accuracy_score{*}, avg:kairo.port.congestion_prediction_accuracy{*}",
+            "display_type": "line"
+          }
+        ],
+        "yaxis": {
+          "include_zero": true,
+          "max": "1",
+          "label": "accuracy"
+        },
+        "show_legend": true
+      },
+      "layout": {
+        "x": 0,
+        "y": 10,
+        "width": 6,
+        "height": 2
+      }
+    },
+    {
+      "id": 13,
+      "definition": {
+        "type": "timeseries",
+        "title": "Average ETA Accuracy",
+        "requests": [
+          {
+            "q": "avg:kairo.eta.accuracy_minutes{*}",
+            "display_type": "line"
+          }
+        ],
+        "markers": [
+          {
+            "value": "y = 30",
+            "display_type": "warning dashed",
+            "label": "Target: ±30 min"
+          }
+        ],
+        "yaxis": {
+          "include_zero": true,
+          "label": "minutes deviation"
+        }
+      },
+      "layout": {
+        "x": 6,
+        "y": 10,
+        "width": 6,
+        "height": 2
+      }
+    },
+    {
+      "id": 14,
+      "definition": {
+        "type": "query_table",
+        "title": "Monthly Performance Summary",
+        "requests": [
+          {
+            "q": "sum:kairo.voyages.optimized{*}.rollup(sum), sum:kairo.fuel_savings.total{*}.rollup(sum), sum:kairo.co2_reduction.total{*}.rollup(sum), sum:kairo.cost_savings.total{*}.rollup(sum)",
+            "aggregator": "avg",
+            "alias": "Voyages, Fuel Saved (MT), CO₂ Reduced (MT), Cost Savings (USD)"
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 12,
+        "width": 12,
+        "height": 2
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "env",
+      "default": "production",
+      "prefix": "env"
+    },
+    {
+      "name": "customer_id",
+      "default": "*",
+      "prefix": "customer_id"
+    },
+    {
+      "name": "route_type",
+      "default": "*",
+      "prefix": "route_type"
+    }
+  ],
+  "layout_type": "ordered",
+  "is_read_only": false,
+  "notify_list": [],
+  "tags": [
+    "team:business-ops",
+    "category:business-metrics",
+    "dashboard:business-impact"
+  ]
+}

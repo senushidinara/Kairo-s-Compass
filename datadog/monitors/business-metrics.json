@@ -1,0 +1,76 @@
+{
+  "monitors": [
+    {
+      "name": "Fuel Savings Deviation",
+      "type": "metric alert",
+      "query": "avg(last_1h):abs(avg:kairo.fuel_savings.actual{*} - avg:kairo.fuel_savings.predicted{*}) / avg:kairo.fuel_savings.predicted{*} > 0.05",
+      "message": "## Fuel Savings Deviation Alert\n\nActual fuel savings deviate from predictions by more than 5%.\n\n**Current Status:**\n- Deviation: {{value}}%\n- Threshold: 5%\n- Environment: {{env}}\n- Time window: Last 1 hour\n\n**Impact:**\n- Model accuracy concerns\n- Customer trust issues\n- Potential business impact\n- Route optimization effectiveness\n\n**Investigation Steps:**\n1. Review recent voyages and their outcomes\n2. Check ML model version and performance\n3. Verify AIS data quality\n4. Review weather data accuracy\n5. Analyze route adherence by vessels\n6. Check current/wave prediction models\n\n**Related Metrics:**\n- Model confidence: `kairo.current.accuracy_score`\n- Prediction errors: `kairo.fuel_savings.prediction_error`\n- Route adherence: `kairo.route.adherence_percentage`\n\n{{#is_alert}}\n@slack-ml-engineering\n@slack-business-ops\n{{/is_alert}}",
+      "tags": [
+        "service:kairo-ml",
+        "team:ml-engineering",
+        "category:business-metrics",
+        "metric:fuel-savings"
+      ],
+      "options": {
+        "thresholds": {
+          "critical": 0.05,
+          "warning": 0.03
+        },
+        "notify_no_data": true,
+        "no_data_timeframe": 120,
+        "require_full_window": true,
+        "notify_audit": true,
+        "include_tags": true
+      },
+      "priority": 2
+    },
+    {
+      "name": "Route Optimization Success Rate",
+      "type": "metric alert",
+      "query": "avg(last_1h):avg:kairo.route.optimization_success_rate{*} < 0.95",
+      "message": "## Route Optimization Success Rate Alert\n\nRoute optimization success rate has fallen below 95%.\n\n**Current Status:**\n- Success rate: {{value}}%\n- Threshold: 95%\n- Environment: {{env}}\n\n**Impact:**\n- Reduced service quality\n- Customer dissatisfaction\n- Potential revenue impact\n\n**Common Causes:**\n1. External API failures (weather, currents)\n2. Database performance issues\n3. Invalid route constraints\n4. Missing AIS data\n5. Port database inconsistencies\n\n**Action Items:**\n1. Check error logs for failed optimizations\n2. Verify external service health\n3. Review recent route requests\n4. Validate input data quality\n\n{{#is_alert}}\n@slack-nav-engineering\n@slack-customer-success\n{{/is_alert}}",
+      "tags": [
+        "service:kairo-api",
+        "team:nav-engineering",
+        "category:business-metrics",
+        "metric:success-rate"
+      ],
+      "options": {
+        "thresholds": {
+          "critical": 0.95,
+          "warning": 0.97
+        },
+        "notify_no_data": true,
+        "no_data_timeframe": 60,
+        "require_full_window": true,
+        "notify_audit": true,
+        "include_tags": true
+      },
+      "priority": 2
+    },
+    {
+      "name": "Port Congestion Prediction Accuracy",
+      "type": "metric alert",
+      "query": "avg(last_1d):avg:kairo.port.congestion_prediction_accuracy{*} < 0.8",
+      "message": "## Port Congestion Prediction Accuracy Alert\n\nPort congestion prediction accuracy has fallen below 80%.\n\n**Current Status:**\n- Accuracy: {{value}}%\n- Threshold: 80%\n- Time window: Last 24 hours\n\n**Impact:**\n- Inaccurate ETA predictions\n- Suboptimal port scheduling\n- Customer planning issues\n- Revenue impact\n\n**Investigation:**\n1. Review prediction model performance\n2. Check historical port data quality\n3. Verify real-time port updates\n4. Analyze prediction errors by port\n5. Review feature engineering pipeline\n\n**Model Metrics:**\n- Precision: Check `kairo.port.congestion_precision`\n- Recall: Check `kairo.port.congestion_recall`\n- False positives: Check `kairo.port.congestion_false_positives`\n\n{{#is_alert}}\n@slack-ml-engineering\n@slack-operations\n{{/is_alert}}",
+      "tags": [
+        "service:kairo-ml",
+        "team:ml-engineering",
+        "category:business-metrics",
+        "metric:prediction-accuracy"
+      ],
+      "options": {
+        "thresholds": {
+          "critical": 0.8,
+          "warning": 0.85
+        },
+        "notify_no_data": true,
+        "no_data_timeframe": 1440,
+        "require_full_window": true,
+        "notify_audit": true,
+        "include_tags": true
+      },
+      "priority": 3
+    }
+  ]
+}

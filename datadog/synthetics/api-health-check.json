@@ -1,0 +1,74 @@
+{
+  "name": "Kairo's Compass - API Health Check",
+  "type": "api",
+  "subtype": "http",
+  "config": {
+    "request": {
+      "method": "GET",
+      "url": "https://api.kairos-compass.com/health",
+      "timeout": 30,
+      "headers": {
+        "User-Agent": "Datadog Synthetics"
+      }
+    },
+    "assertions": [
+      {
+        "type": "statusCode",
+        "operator": "is",
+        "target": 200
+      },
+      {
+        "type": "responseTime",
+        "operator": "lessThan",
+        "target": 500
+      },
+      {
+        "type": "body",
+        "operator": "contains",
+        "target": "healthy"
+      },
+      {
+        "type": "header",
+        "property": "content-type",
+        "operator": "contains",
+        "target": "application/json"
+      }
+    ]
+  },
+  "locations": [
+    "aws:us-east-1",
+    "aws:us-west-2",
+    "aws:eu-west-1",
+    "aws:eu-central-1",
+    "aws:ap-northeast-1",
+    "aws:ap-southeast-1",
+    "aws:ap-southeast-2",
+    "aws:sa-east-1",
+    "aws:ca-central-1",
+    "azure:eastus",
+    "azure:westeurope",
+    "gcp:us-central1"
+  ],
+  "options": {
+    "tick_every": 60,
+    "min_failure_duration": 120,
+    "min_location_failed": 2,
+    "follow_redirects": true,
+    "retry": {
+      "count": 2,
+      "interval": 300
+    },
+    "monitor_options": {
+      "renotify_interval": 0
+    }
+  },
+  "message": "## API Health Check Failed\n\nThe main API health endpoint is not responding correctly.\n\n**Details:**\n- Endpoint: {{request.url}}\n- Status: {{check.status}}\n- Response time: {{check.responseTime}}ms\n- Failed locations: {{check.failedLocations}}\n\n**Impact:**\n- API unavailable for users\n- Route calculations cannot be performed\n- Critical system outage\n\n**Action Required:**\n1. Check GCP Cloud Run service status\n2. Review application logs\n3. Verify database connectivity\n4. Check external dependencies\n\n{{#is_alert}}\n@slack-sre-critical\n@pagerduty-critical\n{{/is_alert}}",
+  "tags": [
+    "service:kairo-api",
+    "team:sre",
+    "category:health-check",
+    "env:production",
+    "slo:availability"
+  ],
+  "status": "live"
+}

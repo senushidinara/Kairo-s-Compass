@@ -12,7 +12,9 @@
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "@google/genai": "^1.33.0",
-    "recharts": "^3.5.1"
+    "recharts": "^3.5.1",
+    "hot-shots": "^10.0.0",
+    "dd-trace": "^5.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
