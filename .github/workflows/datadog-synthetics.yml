@@ -109,7 +109,7 @@ jobs:
       with:
         api_key: ${{secrets.DD_API_KEY}}
         app_key: ${{secrets.DD_APP_KEY}}
-        test_search_query: 'tag:health-check tag:env:production'
+        test_search_query: "tag:health-check tag:env:production"
         
     - name: Send deployment success notification
       if: success()
