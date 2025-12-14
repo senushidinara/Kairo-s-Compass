@@ -1,0 +1,295 @@
+{
+  "title": "Kairo's Compass - Global Operations",
+  "description": "Real-time overview of active voyages, system health, and key performance indicators",
+  "widgets": [
+    {
+      "id": 1,
+      "definition": {
+        "type": "geomap",
+        "title": "Active Voyages - Real-time Map",
+        "requests": [
+          {
+            "q": "avg:kairo.vessel.latitude{*} by {vessel_id}, avg:kairo.vessel.longitude{*} by {vessel_id}",
+            "display_type": "markers"
+          }
+        ],
+        "view": {
+          "focus": "WORLD"
+        },
+        "style": {
+          "palette": "green_to_orange",
+          "palette_flip": false
+        },
+        "custom_links": [
+          {
+            "label": "View Vessel Details",
+            "link": "/vessels/{{vessel_id.value}}"
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 8,
+        "height": 4
+      }
+    },
+    {
+      "id": 2,
+      "definition": {
+        "type": "query_value",
+        "title": "Active Voyages",
+        "requests": [
+          {
+            "q": "count_nonzero(avg:kairo.voyages.active{*})",
+            "aggregator": "last"
+          }
+        ],
+        "precision": 0,
+        "custom_unit": "voyages"
+      },
+      "layout": {
+        "x": 8,
+        "y": 0,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "id": 3,
+      "definition": {
+        "type": "query_value",
+        "title": "Total Fuel Saved (24h)",
+        "requests": [
+          {
+            "q": "sum:kairo.fuel_savings.total{*}.rollup(sum, 86400)",
+            "aggregator": "sum"
+          }
+        ],
+        "precision": 2,
+        "custom_unit": "metric tons"
+      },
+      "layout": {
+        "x": 10,
+        "y": 0,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "id": 4,
+      "definition": {
+        "type": "query_value",
+        "title": "System Health Score",
+        "requests": [
+          {
+            "q": "avg:kairo.system.health_score{*}",
+            "aggregator": "last",
+            "conditional_formats": [
+              {
+                "comparator": ">=",
+                "value": 95,
+                "palette": "white_on_green"
+              },
+              {
+                "comparator": ">=",
+                "value": 80,
+                "palette": "white_on_yellow"
+              },
+              {
+                "comparator": "<",
+                "value": 80,
+                "palette": "white_on_red"
+              }
+            ]
+          }
+        ],
+        "precision": 1,
+        "custom_unit": "%"
+      },
+      "layout": {
+        "x": 8,
+        "y": 2,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "id": 5,
+      "definition": {
+        "type": "query_value",
+        "title": "Route Optimization Success",
+        "requests": [
+          {
+            "q": "avg:kairo.route.optimization_success_rate{*}*100",
+            "aggregator": "last"
+          }
+        ],
+        "precision": 2,
+        "custom_unit": "%"
+      },
+      "layout": {
+        "x": 10,
+        "y": 2,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "id": 6,
+      "definition": {
+        "type": "timeseries",
+        "title": "Voyage Status Distribution",
+        "requests": [
+          {
+            "q": "sum:kairo.voyages.count{*} by {status}",
+            "display_type": "area",
+            "style": {
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "yaxis": {
+          "include_zero": true
+        },
+        "show_legend": true
+      },
+      "layout": {
+        "x": 0,
+        "y": 4,
+        "width": 4,
+        "height": 2
+      }
+    },
+    {
+      "id": 7,
+      "definition": {
+        "type": "timeseries",
+        "title": "API Request Rate",
+        "requests": [
+          {
+            "q": "sum:kairo.api.requests{*}.as_rate()",
+            "display_type": "line",
+            "style": {
+              "palette": "cool",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "yaxis": {
+          "include_zero": true,
+          "label": "req/s"
+        }
+      },
+      "layout": {
+        "x": 4,
+        "y": 4,
+        "width": 4,
+        "height": 2
+      }
+    },
+    {
+      "id": 8,
+      "definition": {
+        "type": "timeseries",
+        "title": "AIS Data Ingestion Rate",
+        "requests": [
+          {
+            "q": "sum:kairo.ais.messages_per_second{*}",
+            "display_type": "bars",
+            "style": {
+              "palette": "purple"
+            }
+          }
+        ],
+        "yaxis": {
+          "include_zero": true,
+          "label": "msg/s"
+        }
+      },
+      "layout": {
+        "x": 8,
+        "y": 4,
+        "width": 4,
+        "height": 2
+      }
+    },
+    {
+      "id": 9,
+      "definition": {
+        "type": "toplist",
+        "title": "Top Vessels by Fuel Savings",
+        "requests": [
+          {
+            "q": "top(sum:kairo.fuel_savings.percentage{*} by {vessel_id}, 10, 'mean', 'desc')"
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 6,
+        "width": 4,
+        "height": 2
+      }
+    },
+    {
+      "id": 10,
+      "definition": {
+        "type": "heatmap",
+        "title": "Route Calculation Latency Distribution",
+        "requests": [
+          {
+            "q": "avg:kairo.route.calculation_time_ms{*}"
+          }
+        ]
+      },
+      "layout": {
+        "x": 4,
+        "y": 6,
+        "width": 4,
+        "height": 2
+      }
+    },
+    {
+      "id": 11,
+      "definition": {
+        "type": "alert_graph",
+        "title": "Active Alerts",
+        "alert_id": "*",
+        "viz_type": "timeseries"
+      },
+      "layout": {
+        "x": 8,
+        "y": 6,
+        "width": 4,
+        "height": 2
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "env",
+      "default": "*",
+      "prefix": "env"
+    },
+    {
+      "name": "service",
+      "default": "*",
+      "prefix": "service"
+    },
+    {
+      "name": "vessel_id",
+      "default": "*",
+      "prefix": "vessel_id"
+    }
+  ],
+  "layout_type": "ordered",
+  "is_read_only": false,
+  "notify_list": [],
+  "tags": [
+    "team:nav-engineering",
+    "category:operations",
+    "dashboard:global"
+  ]
+}

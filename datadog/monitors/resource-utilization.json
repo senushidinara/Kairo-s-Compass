@@ -1,0 +1,74 @@
+{
+  "monitors": [
+    {
+      "name": "High CPU Utilization",
+      "type": "metric alert",
+      "query": "avg(last_5m):avg:system.cpu.user{service:kairo-api} > 0.8",
+      "message": "## CPU Utilization Alert\n\nCPU utilization has exceeded 80% for 5 minutes.\n\n**Current Status:**\n- CPU usage: {{value}}%\n- Threshold: 80%\n- Instance: {{host.name}}\n- Service: {{service.name}}\n- Environment: {{env}}\n\n**Impact:**\n- Degraded API response times\n- Potential request timeouts\n- Service instability\n\n**Investigation Steps:**\n1. Check active request count\n2. Review recent deployments\n3. Verify auto-scaling configuration\n4. Check for resource-intensive queries\n5. Review APM traces for slow operations\n\n**Auto-scaling Status:**\n- Current instances: Check GCP Cloud Run metrics\n- Max instances: Verify configuration\n\n{{#is_alert}}\n@slack-infrastructure-alerts\n@pagerduty\n{{/is_alert}}",
+      "tags": [
+        "service:kairo-api",
+        "team:infrastructure",
+        "category:resource",
+        "resource:cpu"
+      ],
+      "options": {
+        "thresholds": {
+          "critical": 0.8,
+          "warning": 0.65
+        },
+        "notify_no_data": false,
+        "require_full_window": true,
+        "notify_audit": true,
+        "include_tags": true
+      },
+      "priority": 2
+    },
+    {
+      "name": "Memory Pressure",
+      "type": "metric alert",
+      "query": "avg(last_5m):avg:system.mem.used{service:kairo-api} / avg:system.mem.total{service:kairo-api} > 0.9",
+      "message": "## Memory Pressure Alert\n\nMemory utilization has exceeded 90%.\n\n**Current Status:**\n- Memory usage: {{value}}%\n- Threshold: 90%\n- Instance: {{host.name}}\n- Service: {{service.name}}\n\n**Impact:**\n- Risk of OOM (Out of Memory) errors\n- Service crashes\n- Request failures\n\n**Action Items:**\n1. Check for memory leaks\n2. Review cache size configuration\n3. Analyze heap dumps\n4. Verify garbage collection patterns\n5. Consider increasing instance memory\n\n{{#is_alert}}\n@slack-infrastructure-critical\n@pagerduty-critical\n{{/is_alert}}",
+      "tags": [
+        "service:kairo-api",
+        "team:infrastructure",
+        "category:resource",
+        "resource:memory"
+      ],
+      "options": {
+        "thresholds": {
+          "critical": 0.9,
+          "warning": 0.75
+        },
+        "notify_no_data": false,
+        "require_full_window": true,
+        "notify_audit": true,
+        "include_tags": true
+      },
+      "priority": 1
+    },
+    {
+      "name": "Database Connection Pool Saturation",
+      "type": "metric alert",
+      "query": "avg(last_5m):avg:kairo.db.connection_pool.used{*} / avg:kairo.db.connection_pool.total{*} > 0.95",
+      "message": "## Database Connection Pool Alert\n\nDatabase connection pool is at 95% capacity.\n\n**Current Status:**\n- Pool utilization: {{value}}%\n- Threshold: 95%\n- Database: {{database.name}}\n- Service: {{service.name}}\n\n**Impact:**\n- Connection acquisition timeouts\n- Degraded query performance\n- Request failures\n\n**Investigation:**\n1. Check for connection leaks\n2. Review query execution times\n3. Verify connection timeout settings\n4. Check for long-running transactions\n5. Consider increasing pool size\n\n**Current Metrics:**\n- Active connections: Check `kairo.db.connections.active`\n- Idle connections: Check `kairo.db.connections.idle`\n- Wait time: Check `kairo.db.connection_wait_time_ms`\n\n{{#is_alert}}\n@slack-database-alerts\n@pagerduty\n{{/is_alert}}",
+      "tags": [
+        "service:kairo-api",
+        "team:database",
+        "category:resource",
+        "resource:database"
+      ],
+      "options": {
+        "thresholds": {
+          "critical": 0.95,
+          "warning": 0.85
+        },
+        "notify_no_data": true,
+        "no_data_timeframe": 10,
+        "require_full_window": false,
+        "notify_audit": true,
+        "include_tags": true
+      },
+      "priority": 2
+    }
+  ]
+}

@@ -1,0 +1,333 @@
+{
+  "title": "Kairo's Compass - System Performance",
+  "description": "Comprehensive system performance metrics including P95 latency, error rates, and service dependencies",
+  "widgets": [
+    {
+      "id": 1,
+      "definition": {
+        "type": "timeseries",
+        "title": "P95 Latency Across Services",
+        "requests": [
+          {
+            "q": "p95:trace.web.request.duration{service:kairo-api} by {resource_name}",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "markers": [
+          {
+            "value": "y = 1000",
+            "display_type": "error dashed",
+            "label": "SLO Threshold (1s)"
+          }
+        ],
+        "yaxis": {
+          "include_zero": true,
+          "label": "ms"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 3
+      }
+    },
+    {
+      "id": 2,
+      "definition": {
+        "type": "timeseries",
+        "title": "Error Rate by Service",
+        "requests": [
+          {
+            "q": "sum:trace.web.request.errors{*} by {service}.as_rate()",
+            "display_type": "bars",
+            "style": {
+              "palette": "warm"
+            }
+          }
+        ],
+        "yaxis": {
+          "include_zero": true,
+          "label": "errors/s"
+        }
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 3
+      }
+    },
+    {
+      "id": 3,
+      "definition": {
+        "type": "servicemap",
+        "title": "Service Dependency Map",
+        "service": "kairo-api",
+        "filters": [
+          "env:production"
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 3,
+        "width": 12,
+        "height": 4
+      }
+    },
+    {
+      "id": 4,
+      "definition": {
+        "type": "timeseries",
+        "title": "CPU Utilization",
+        "requests": [
+          {
+            "q": "avg:system.cpu.user{service:kairo-api} by {host}",
+            "display_type": "line"
+          }
+        ],
+        "yaxis": {
+          "include_zero": true,
+          "max": "1",
+          "label": "utilization"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 7,
+        "width": 4,
+        "height": 2
+      }
+    },
+    {
+      "id": 5,
+      "definition": {
+        "type": "timeseries",
+        "title": "Memory Utilization",
+        "requests": [
+          {
+            "q": "avg:system.mem.used{service:kairo-api} by {host} / avg:system.mem.total{service:kairo-api} by {host}",
+            "display_type": "line"
+          }
+        ],
+        "yaxis": {
+          "include_zero": true,
+          "max": "1",
+          "label": "utilization"
+        }
+      },
+      "layout": {
+        "x": 4,
+        "y": 7,
+        "width": 4,
+        "height": 2
+      }
+    },
+    {
+      "id": 6,
+      "definition": {
+        "type": "timeseries",
+        "title": "Database Connection Pool",
+        "requests": [
+          {
+            "q": "avg:kairo.db.connection_pool.used{*}, avg:kairo.db.connection_pool.total{*}",
+            "display_type": "line",
+            "style": {
+              "palette": "cool"
+            }
+          }
+        ],
+        "yaxis": {
+          "include_zero": true,
+          "label": "connections"
+        }
+      },
+      "layout": {
+        "x": 8,
+        "y": 7,
+        "width": 4,
+        "height": 2
+      }
+    },
+    {
+      "id": 7,
+      "definition": {
+        "type": "timeseries",
+        "title": "Database Query Performance",
+        "requests": [
+          {
+            "q": "p50:kairo.db.query.duration_ms{*}, p95:kairo.db.query.duration_ms{*}, p99:kairo.db.query.duration_ms{*}",
+            "display_type": "line"
+          }
+        ],
+        "yaxis": {
+          "include_zero": true,
+          "label": "ms"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 9,
+        "width": 6,
+        "height": 2
+      }
+    },
+    {
+      "id": 8,
+      "definition": {
+        "type": "timeseries",
+        "title": "Cache Hit Rate",
+        "requests": [
+          {
+            "q": "sum:kairo.cache.hits{*}.as_rate() / (sum:kairo.cache.hits{*}.as_rate() + sum:kairo.cache.misses{*}.as_rate())",
+            "display_type": "line"
+          }
+        ],
+        "yaxis": {
+          "include_zero": true,
+          "max": "1",
+          "label": "hit rate"
+        }
+      },
+      "layout": {
+        "x": 6,
+        "y": 9,
+        "width": 6,
+        "height": 2
+      }
+    },
+    {
+      "id": 9,
+      "definition": {
+        "type": "timeseries",
+        "title": "GCP Cloud Run Instances",
+        "requests": [
+          {
+            "q": "avg:gcp.run.request.count{*} by {service_name}",
+            "display_type": "area"
+          }
+        ],
+        "yaxis": {
+          "include_zero": true
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 11,
+        "width": 4,
+        "height": 2
+      }
+    },
+    {
+      "id": 10,
+      "definition": {
+        "type": "timeseries",
+        "title": "Kafka Consumer Lag",
+        "requests": [
+          {
+            "q": "avg:kairo.kafka.consumer_lag{*} by {topic}",
+            "display_type": "bars",
+            "style": {
+              "palette": "purple"
+            }
+          }
+        ],
+        "yaxis": {
+          "include_zero": true,
+          "label": "messages"
+        }
+      },
+      "layout": {
+        "x": 4,
+        "y": 11,
+        "width": 4,
+        "height": 2
+      }
+    },
+    {
+      "id": 11,
+      "definition": {
+        "type": "timeseries",
+        "title": "API Response Time Distribution",
+        "requests": [
+          {
+            "q": "p50:trace.web.request.duration{service:kairo-api}, p75:trace.web.request.duration{service:kairo-api}, p90:trace.web.request.duration{service:kairo-api}, p95:trace.web.request.duration{service:kairo-api}, p99:trace.web.request.duration{service:kairo-api}",
+            "display_type": "line"
+          }
+        ],
+        "yaxis": {
+          "include_zero": true,
+          "label": "ms"
+        },
+        "show_legend": true
+      },
+      "layout": {
+        "x": 8,
+        "y": 11,
+        "width": 4,
+        "height": 2
+      }
+    },
+    {
+      "id": 12,
+      "definition": {
+        "type": "toplist",
+        "title": "Slowest Endpoints",
+        "requests": [
+          {
+            "q": "top(avg:trace.web.request.duration{service:kairo-api} by {resource_name}, 10, 'mean', 'desc')"
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 13,
+        "width": 6,
+        "height": 2
+      }
+    },
+    {
+      "id": 13,
+      "definition": {
+        "type": "toplist",
+        "title": "Endpoints with Most Errors",
+        "requests": [
+          {
+            "q": "top(sum:trace.web.request.errors{service:kairo-api} by {resource_name}, 10, 'sum', 'desc')"
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 13,
+        "width": 6,
+        "height": 2
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "env",
+      "default": "production",
+      "prefix": "env"
+    },
+    {
+      "name": "service",
+      "default": "kairo-api",
+      "prefix": "service"
+    }
+  ],
+  "layout_type": "ordered",
+  "is_read_only": false,
+  "notify_list": [],
+  "tags": [
+    "team:infrastructure",
+    "category:performance",
+    "dashboard:system"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "name": "Route Calculation Latency",
+  "type": "metric alert",
+  "query": "avg(last_5m):avg:kairo.route.calculation_time_ms{*} > 5000",
+  "message": "## Route Calculation Performance Alert\n\nRoute calculation is taking longer than 5 seconds.\n\n**Current Status:**\n- Average latency: {{value}}ms\n- Threshold: 5000ms\n- Service: {{service.name}}\n- Environment: {{env}}\n\n**Impact:**\n- Degraded user experience\n- Potential timeout issues\n- Route optimization delays\n\n**Action Items:**\n1. Check GCP Cloud Run instance performance\n2. Review database query performance\n3. Verify AIS data ingestion pipeline\n4. Check for external API latency\n\n{{#is_alert}}\n@slack-nav-engineering-alerts\n@pagerduty-critical\n{{/is_alert}}\n\n{{#is_warning}}\n@slack-nav-engineering\n{{/is_warning}}",
+  "tags": [
+    "service:kairo-api",
+    "team:nav-engineering",
+    "category:performance",
+    "impact:high"
+  ],
+  "options": {
+    "thresholds": {
+      "critical": 5000,
+      "warning": 3000
+    },
+    "notify_no_data": true,
+    "no_data_timeframe": 10,
+    "require_full_window": false,
+    "notify_audit": true,
+    "include_tags": true,
+    "new_group_delay": 60
+  },
+  "priority": 2,
+  "restricted_roles": null
+}

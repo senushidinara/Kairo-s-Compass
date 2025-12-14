@@ -1,0 +1,26 @@
+{
+  "name": "AIS Data Ingestion Gap",
+  "type": "metric alert",
+  "query": "avg(last_5m):avg:kairo.ais.data_age_seconds{*} > 120",
+  "message": "## AIS Data Ingestion Alert\n\nAIS data ingestion has a gap exceeding 2 minutes.\n\n**Current Status:**\n- Data age: {{value}}s\n- Threshold: 120s\n- Pipeline: {{pipeline.name}}\n- Environment: {{env}}\n\n**Impact:**\n- Stale vessel position data\n- Inaccurate route calculations\n- Degraded real-time tracking\n- Potential safety concerns\n\n**Root Cause Analysis:**\n1. Check Confluent Kafka cluster health\n2. Verify AIS data source connectivity\n3. Review consumer lag metrics\n4. Check Cloud Function execution status\n5. Validate data transformation pipeline\n\n**Data Pipeline Status:**\n- Kafka lag: Check `kairo.kafka.consumer_lag`\n- Ingestion rate: Check `kairo.ais.messages_per_second`\n- Error rate: Check `kairo.ais.ingestion_errors`\n\n{{#is_alert}}\n@slack-data-engineering-critical\n@pagerduty-critical\n{{/is_alert}}\n\n{{#is_warning}}\n@slack-data-engineering\n{{/is_warning}}",
+  "tags": [
+    "service:kairo-data-pipeline",
+    "team:data-engineering",
+    "category:data-quality",
+    "impact:critical"
+  ],
+  "options": {
+    "thresholds": {
+      "critical": 120,
+      "warning": 90
+    },
+    "notify_no_data": true,
+    "no_data_timeframe": 5,
+    "require_full_window": false,
+    "notify_audit": true,
+    "include_tags": true,
+    "evaluation_delay": 60
+  },
+  "priority": 1,
+  "restricted_roles": null
+}
