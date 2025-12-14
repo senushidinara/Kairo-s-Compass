@@ -183,7 +183,7 @@ We use a modern, reactive stack to render the high-frequency data required for b
 
 1.  **Clone the neural pathway:**
     ```bash
-    git clone https://github.com/your-repo/kairos-compass.git
+    (https://github.com/senushidinara/Kairo-s-Compass.git)
     cd kairos-compass
     ```
 
