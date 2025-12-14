@@ -1,0 +1,7 @@
+{
+  "name": "Kairo's Compass",
+  "description": "AI-driven maritime navigation and logistics optimization platform.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
