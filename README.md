@@ -152,10 +152,9 @@ sequenceDiagram
     end
 ```
 
-### 📸 Visual Evidence
+### 📸 
 
-| The Surface View | The Hidden Reality |
-| :---: | :---: |
+
 | ![image](https://github.com/user-attachments/assets/1eba225d-39ea-432d-8830-270c2759c162)
  |![image](https://github.com/user-attachments/assets/fc851db1-43f2-48ec-bce7-83ed046ffa42)
 
