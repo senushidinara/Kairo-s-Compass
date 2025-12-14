@@ -2,7 +2,8 @@
 
 > *"AI-driven maritime navigation that saves fuel by riding ocean whispers... or so they think."*
 
-![Project Banner](https://images.unsplash.com/photo-1494412574643-35d324688b91?q=80&w=1200&auto=format&fit=crop)
+![image](https://github.com/user-attachments/assets/32db0072-2837-4386-b02c-59b942fa4716)
+
 
 <div align="center">
 
@@ -155,7 +156,9 @@ sequenceDiagram
 
 | The Surface View | The Hidden Reality |
 | :---: | :---: |
-| ![Shipping](https://images.unsplash.com/photo-1541453267868-b80c102a9949?w=400&h=200&fit=crop) | ![Neurons](https://images.unsplash.com/photo-1559757175-5700dde675bc?w=400&h=200&fit=crop) |
+| ![image](https://github.com/user-attachments/assets/1eba225d-39ea-432d-8830-270c2759c162)
+ |![image](https://github.com/user-attachments/assets/fc851db1-43f2-48ec-bce7-83ed046ffa42)
+
 | *Just a busy port...* | *...is actually a firing synapse.* |
 
 </details>
