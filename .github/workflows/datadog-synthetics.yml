@@ -75,21 +75,21 @@ jobs:
       with:
         api_key: ${{secrets.DD_API_KEY}}
         app_key: ${{secrets.DD_APP_KEY}}
-        test_search_query: 'tag:health-check tag:env:${{ github.event.inputs.environment || 'production' }}'
+        test_search_query: "tag:health-check tag:env:${{ github.event.inputs.environment || 'production' }}"
         
     - name: Run Datadog Synthetic tests - E2E Tests
       uses: DataDog/synthetics-ci-github-action@87b505388a22005bb8013481e3f73a367b9a53eb # v1.4.0
       with:
         api_key: ${{secrets.DD_API_KEY}}
         app_key: ${{secrets.DD_APP_KEY}}
-        test_search_query: 'tag:e2e-tests tag:env:${{ github.event.inputs.environment || 'production' }}'
+        test_search_query: "tag:e2e-tests tag:env:${{ github.event.inputs.environment || 'production' }}"
         
     - name: Run Datadog Synthetic tests - Critical Path
       uses: DataDog/synthetics-ci-github-action@87b505388a22005bb8013481e3f73a367b9a53eb # v1.4.0
       with:
         api_key: ${{secrets.DD_API_KEY}}
         app_key: ${{secrets.DD_APP_KEY}}
-        test_search_query: 'tag:critical-path tag:env:${{ github.event.inputs.environment || 'production' }}'
+        test_search_query: "tag:critical-path tag:env:${{ github.event.inputs.environment || 'production' }}"
 
   post-deployment-verification:
     name: Post-deployment Verification
@@ -109,7 +109,7 @@ jobs:
       with:
         api_key: ${{secrets.DD_API_KEY}}
         app_key: ${{secrets.DD_APP_KEY}}
-        test_search_query: 'tag:health-check tag:env:production'
+        test_search_query: "tag:health-check tag:env:production"
         
     - name: Send deployment success notification
       if: success()
