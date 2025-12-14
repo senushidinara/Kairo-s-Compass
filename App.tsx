@@ -3,6 +3,7 @@ import NeuralMap from './components/NeuralMap';
 import ThalassaInterface from './components/ThalassaInterface';
 import MetricsPanel from './components/MetricsPanel';
 import { AppMode, Page } from './types';
+import { SHIPS_DATA, ROUTES, PORTS } from './constants';
 
 const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -112,34 +113,105 @@ const App: React.FC = () => {
       {/* Main Content Area */}
       <div className="flex-1 overflow-hidden p-4 relative">
         
-        {/* DASHBOARD VIEW (Original Grid) */}
+        {/* DASHBOARD VIEW - ORGANIZED GRID */}
         {page === Page.DASHBOARD && (
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 h-full animate-in fade-in duration-500">
-            <div className="md:col-span-4 flex flex-col gap-4 overflow-hidden h-full">
-                <div className="flex-1 min-h-0">
-                     <ThalassaInterface mode={mode} />
-                </div>
-                <div className="h-1/3 min-h-[250px]">
-                     <MetricsPanel mode={mode} />
-                </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full animate-in fade-in duration-500 overflow-hidden">
+            
+            {/* Col 1: AI & Comms */}
+            <div className="flex flex-col gap-4 h-full min-h-0">
+               <div className="bg-slate-900/50 p-3 rounded-lg border border-slate-700/50 mb-2 shrink-0">
+                  <h2 className={`text-sm font-mono font-bold ${isHidden ? 'text-purple-400' : 'text-sky-400'}`}>
+                    {isHidden ? 'CORTICAL COMMAND' : 'OPERATIONS BRIDGE'}
+                  </h2>
+                  <p className="text-xs text-slate-500">
+                    {isHidden ? 'Direct neural interface active.' : 'Global logistics oversight online.'}
+                  </p>
+               </div>
+               <div className="flex-1 min-h-0">
+                 <ThalassaInterface mode={mode} />
+               </div>
             </div>
-            <div className="md:col-span-8 relative rounded-xl overflow-hidden border border-slate-700/50 shadow-2xl">
-                <div className="absolute top-4 right-4 z-10 flex flex-col gap-2 pointer-events-none">
-                     <div className="glass-panel px-3 py-1 rounded text-xs font-mono text-slate-300">
-                        ZOOM: 100%
-                     </div>
-                     <div className="glass-panel px-3 py-1 rounded text-xs font-mono text-slate-300">
-                        LAYER: {isHidden ? 'CORTICAL' : 'SURFACE'}
-                     </div>
-                </div>
-                <NeuralMap mode={mode} />
+
+            {/* Col 2: Fleet/Network Status (The List) */}
+            <div className="glass-panel rounded-xl flex flex-col h-full overflow-hidden min-h-0">
+               <div className={`p-4 border-b ${isHidden ? 'border-purple-500/30 bg-purple-900/10' : 'border-sky-500/30 bg-sky-900/10'}`}>
+                  <h3 className={`font-mono text-xs font-bold tracking-widest uppercase ${isHidden ? 'text-purple-300' : 'text-sky-300'}`}>
+                    {isHidden ? 'ACTIVE NEUROTRANSMITTERS' : 'FLEET MANIFEST'}
+                  </h3>
+               </div>
+               <div className="flex-1 overflow-y-auto p-2">
+                  <table className="w-full text-left border-collapse">
+                    <thead className="text-[10px] uppercase text-slate-500 font-mono sticky top-0 bg-ocean-900/90 backdrop-blur z-10">
+                      <tr>
+                        <th className="p-3">{isHidden ? 'Molecule' : 'Vessel Name'}</th>
+                        <th className="p-3">{isHidden ? 'Action' : 'Cargo'}</th>
+                        <th className="p-3">{isHidden ? 'Signal' : 'Status'}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="font-mono text-xs">
+                      {SHIPS_DATA.map(ship => {
+                        const route = ROUTES.find(r => r.id === ship.routeId);
+                        return (
+                          <tr key={ship.id} className={`border-b border-slate-800/50 hover:bg-white/5 transition-colors ${isHidden ? 'hover:bg-purple-900/20' : ''}`}>
+                            <td className={`p-3 font-bold ${isHidden ? 'text-purple-300' : 'text-slate-200'}`}>
+                              {isHidden ? ship.neurotransmitter : ship.name}
+                            </td>
+                            <td className="p-3 text-slate-400">
+                               {isHidden ? 'EXCITATORY' : ship.cargoType}
+                            </td>
+                            <td className="p-3">
+                              <span className={`px-2 py-1 rounded text-[10px] border ${
+                                route?.status === 'optimal' 
+                                  ? (isHidden ? 'border-purple-500/50 text-purple-400 bg-purple-500/10' : 'border-emerald-500/50 text-emerald-400 bg-emerald-500/10')
+                                  : 'border-amber-500/50 text-amber-400 bg-amber-500/10'
+                              }`}>
+                                {isHidden ? (route?.status === 'optimal' ? 'FLOW' : 'BLOCK') : route?.status.toUpperCase()}
+                              </span>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                  
+                  {/* Additional "Hidden" data rows to fill space */}
+                   <div className="mt-6 px-3">
+                      <h4 className={`text-[10px] font-bold mb-2 uppercase ${isHidden ? 'text-slate-600' : 'text-slate-600'}`}>
+                        {isHidden ? 'Synaptic Hub Status' : 'Port Congestion Index'}
+                      </h4>
+                      <div className="space-y-2">
+                        {PORTS.slice(0,4).map(port => (
+                          <div key={port.id} className="flex items-center justify-between text-xs font-mono">
+                            <span className="text-slate-400">{port.name}</span>
+                            <div className="flex items-center gap-2">
+                              <div className="w-24 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                <div 
+                                  className={`h-full ${isHidden ? 'bg-purple-500' : 'bg-sky-500'}`} 
+                                  style={{ width: `${isHidden ? port.neuralActivity : port.congestionLevel}%` }}
+                                ></div>
+                              </div>
+                              <span className="w-8 text-right text-slate-500">{isHidden ? port.neuralActivity : port.congestionLevel}%</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                   </div>
+               </div>
             </div>
+
+            {/* Col 3: Metrics */}
+            <div className="flex flex-col h-full min-h-0">
+               <div className="flex-1 min-h-0">
+                   <MetricsPanel mode={mode} />
+               </div>
+            </div>
+
           </div>
         )}
 
         {/* MAP VIEW */}
         {page === Page.MAP && (
-          <div className="w-full h-full rounded-xl overflow-hidden border border-slate-700/50 shadow-2xl animate-in zoom-in-95 duration-500">
+          <div className="w-full h-full rounded-xl overflow-hidden border border-slate-700/50 shadow-2xl animate-in zoom-in-95 duration-500 relative">
              <div className="absolute top-6 right-6 z-10 pointer-events-none">
                  <div className="glass-panel px-4 py-2 rounded text-sm font-mono text-slate-300 border-l-4 border-sky-500">
                     MODE: {isHidden ? 'GLOBAL NEURAL NETWORK' : 'FULL SCALE NAVIGATION'}
